@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace ServiceA
 {
+    using System.Net.Http;
+
     public class Startup
     {
         private readonly IConfigurationRoot _configuration;
@@ -27,7 +23,8 @@ namespace ServiceA
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services.AddOptions();
+            services.AddSingleton<HttpMessageHandler, HttpClientHandler>();
             services.Configure<ReverseProxyOptions>(_configuration.GetSection("reverseProxy"));
         }
 
@@ -39,7 +36,7 @@ namespace ServiceA
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc();
+            app.UseMiddleware<ProxyMiddleware>();
         }
     }
 }
